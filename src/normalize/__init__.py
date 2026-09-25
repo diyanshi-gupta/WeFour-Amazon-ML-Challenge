@@ -41,3 +41,4 @@ def apply_normalization(df: pd.DataFrame) -> pd.DataFrame:
 
 
 __all__ = ["normalize_name", "normalize_address", "apply_normalization"]
+# init
