@@ -13,7 +13,9 @@ def test_basic_clean_empty_and_whitespace():
     assert basic_clean("   ") == ""
 
 def test_basic_clean_special_chars():
-    assert basic_clean("!!!@#$%^&*()") == ""
+    # Only & is permitted among special characters
+    assert basic_clean("!!!@#$%^*()") == ""
+    assert basic_clean("Johnson & Johnson") == "johnson & johnson"
 
 def test_basic_clean_casing_and_punctuation():
     assert basic_clean("  ACME   CORP.  ") == "acme corp"
