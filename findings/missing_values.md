@@ -1,18 +1,25 @@
 # Missing & Sparse Value Analysis
 
-_Data not available to run metrics. Below is the expected report format._
-
 ## train_source1.tsv
 
-File train_source1.tsv not found.
+- **Total Rows:** 2206821
+- **Missing/Empty `business_name`:** 0 (0.00%)
+- **Missing/Empty `business_address`:** 0 (0.00%)
+- **Sparse `business_address` (1-4 tokens):** 36128 (1.64%)
 
 ## train_source2.tsv
 
-File train_source2.tsv not found.
+- **Total Rows:** 5034616
+- **Missing/Empty `business_name`:** 2 (0.00%)
+- **Missing/Empty `business_address`:** 168967 (3.36%)
+- **Sparse `business_address` (1-4 tokens):** 244823 (4.86%)
 
 ## train_source3.tsv
 
-File train_source3.tsv not found.
+- **Total Rows:** 5285603
+- **Missing/Empty `business_name`:** 13 (0.00%)
+- **Missing/Empty `business_address`:** 175916 (3.33%)
+- **Sparse `business_address` (1-4 tokens):** 334723 (6.33%)
 
 ## Recommendations for Normalization
 
