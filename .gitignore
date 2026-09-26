@@ -1,6 +1,7 @@
 # Dataset & Outputs (CRITICAL TO IGNORE)
 dataset/
 output/
+student_resource/
 *.zip
 *.csv
 *.tsv

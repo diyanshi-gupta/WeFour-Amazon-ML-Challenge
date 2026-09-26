@@ -350,3 +350,14 @@ def run_blocking_v1_pipeline(
 
     print("=" * 60)
     return v3_full_union
+
+
+# Re-export TF-IDF FAISS blocker for hybrid pipeline integration
+try:
+    from code.business_entity_resolution.src.blocking.tfidf_channel import (
+        TfidfFaissBlocker,
+        tfidf_faiss_blocking,
+    )
+except ImportError:
+    pass
+
