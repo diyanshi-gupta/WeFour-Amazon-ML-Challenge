@@ -4,7 +4,7 @@ Splits Source1 entities by compound key (country, is_singleton) without row-leve
 """
 
 from pathlib import Path
-from typing import Set, Union
+from typing import Set, Union, Optional
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
@@ -12,9 +12,9 @@ from sklearn.model_selection import train_test_split
 def find_train_dir(provided_dir: Union[Path, str]) -> Path:
     """Finds valid train dataset directory containing train_source1.tsv and train_ground_truth.tsv."""
     candidates = [
-        Path("C:/Users/yashi/Downloads/student_resource/dataset/train"),
         Path(provided_dir),
         Path("dataset/train"),
+        Path("C:/Users/yashi/Downloads/student_resource/dataset/train"),
         Path("../dataset/train"),
     ]
     for c in candidates:
@@ -26,7 +26,8 @@ def find_train_dir(provided_dir: Union[Path, str]) -> Path:
 def create_stratified_split(
     train_dir: Union[Path, str] = "dataset/train",
     val_ratio: float = 0.20,
-    seed: int = 42
+    seed: int = 42,
+    output_path: Optional[Union[Path, str]] = None
 ) -> Set[str]:
     """
     Creates entity-level train/validation split stratified by (country, is_singleton).
@@ -35,6 +36,7 @@ def create_stratified_split(
         train_dir: Directory containing train_source1.tsv and train_ground_truth.tsv.
         val_ratio: Fraction of Source1 entities to allocate to validation set (default: 0.20).
         seed: Random state seed for reproducibility (default: 42).
+        output_path: Optional explicit output path for val_source1_ids.txt.
 
     Returns:
         Set[str]: Set of validation source1_entity_ids.
@@ -99,13 +101,25 @@ def create_stratified_split(
     val_ids = set(val_df["source1_entity_id"])
 
     # Output path setup
-    out_dir = Path("dataset/train")
-    out_dir.mkdir(parents=True, exist_ok=True)
-    out_file = out_dir / "val_source1_ids.txt"
+    if output_path is not None:
+        out_file = Path(output_path)
+    else:
+        out_file = resolved_dir / "val_source1_ids.txt"
 
+    out_file.parent.mkdir(parents=True, exist_ok=True)
     with open(out_file, "w", encoding="utf-8") as f:
         for s1_id in sorted(val_ids):
             f.write(f"{s1_id}\n")
+
+    # Also save to dataset/train/val_source1_ids.txt if train_dir is the default project dataset path
+    proj_out_dir = Path("dataset/train")
+    if str(train_dir) == "dataset/train" and output_path is None:
+        proj_out_dir.mkdir(parents=True, exist_ok=True)
+        proj_out_file = proj_out_dir / "val_source1_ids.txt"
+        if proj_out_file.resolve() != out_file.resolve():
+            with open(proj_out_file, "w", encoding="utf-8") as f:
+                for s1_id in sorted(val_ids):
+                    f.write(f"{s1_id}\n")
 
     print(f"[OK] Stratified split complete.")
     print(f"   Total Entities   : {len(merged):,}")

@@ -24,9 +24,10 @@ def test_create_stratified_split(tmp_path):
     val_ids = create_stratified_split(train_dir=train_dir, val_ratio=0.20, seed=42)
 
     assert len(val_ids) == 20
-    assert (Path("dataset/train/val_source1_ids.txt")).exists()
+    val_file = train_dir / "val_source1_ids.txt"
+    assert val_file.exists()
 
-    with open("dataset/train/val_source1_ids.txt", "r", encoding="utf-8") as f:
+    with open(val_file, "r", encoding="utf-8") as f:
         file_ids = set(line.strip() for line in f if line.strip())
 
     assert file_ids == val_ids
