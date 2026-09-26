@@ -275,12 +275,17 @@ def run_blocking_v1_pipeline(
     return v3_full_union
 
 
-# Re-export TF-IDF FAISS blocker for hybrid pipeline integration
+# Re-export TF-IDF and Embedding FAISS blockers for hybrid pipeline integration
 try:
     from code.business_entity_resolution.src.blocking.tfidf_channel import (
         TfidfFaissBlocker,
         tfidf_faiss_blocking,
     )
+    from code.business_entity_resolution.src.blocking.embedding_channel import (
+        EmbeddingFaissBlocker,
+        embedding_faiss_blocking,
+    )
 except ImportError:
     pass
+
 
