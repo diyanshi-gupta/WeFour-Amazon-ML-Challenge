@@ -9,6 +9,11 @@ from code.business_entity_resolution.src.blocking.tfidf_channel import (
     prepare_text_series,
     to_candidate_dict,
 )
+from code.business_entity_resolution.src.blocking.embedding_channel import (
+    EmbeddingFaissBlocker,
+    embedding_faiss_blocking,
+    run_low_tfidf_sanity_check,
+)
 
 __all__ = [
     "exact_name_country_blocking",
@@ -17,5 +22,9 @@ __all__ = [
     "tfidf_faiss_blocking",
     "prepare_text_series",
     "to_candidate_dict",
+    "EmbeddingFaissBlocker",
+    "embedding_faiss_blocking",
+    "run_low_tfidf_sanity_check",
 ]
+
 
