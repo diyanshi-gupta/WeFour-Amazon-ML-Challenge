@@ -232,6 +232,83 @@ def calculate_blocking_metrics(
 
     return recall, avg_candidates
 
+def generate_numeric_token_candidates(s1_df: pd.DataFrame, s2_df: pd.DataFrame, s3_df: pd.DataFrame) -> Dict[str, Set[str]]:
+    """Groups S2 and S3 records matching S1 entities on shared numeric tokens (len>=4) + country from normalized address."""
+    s2_s3 = pd.concat([s2_df, s3_df], ignore_index=True)
+    
+    def extract_tokens(row):
+        addr = str(row.get("normalized_address", row.get("clean_address", row.get("address", ""))))
+        return set(re.findall(r'\b\d{4,}\b', addr))
+        
+    lookup = {}
+    for _, row in s2_s3.iterrows():
+        country = row.get("country", "")
+        tokens = extract_tokens(row)
+        for token in tokens:
+            key = (token, country)
+            lookup.setdefault(key, set()).add(row["entity_id"])
+
+    candidates = {}
+    for _, row in s1_df.iterrows():
+        s1_id = row["entity_id"]
+        country = row.get("country", "")
+        tokens = extract_tokens(row)
+        
+        cands = set()
+        for token in tokens:
+            key = (token, country)
+            if key in lookup:
+                cands.update(lookup[key])
+        candidates[s1_id] = cands
+
+    return candidates
+
+def generate_rare_token_candidates(s1_df: pd.DataFrame, s2_df: pd.DataFrame, s3_df: pd.DataFrame) -> Dict[str, Set[str]]:
+    """Groups S2 and S3 records matching S1 entities on shared rare tokens in the name."""
+    s2_s3 = pd.concat([s2_df, s3_df], ignore_index=True)
+    
+    def get_tokens(name):
+        name = str(name) if pd.notna(name) else ""
+        return set(name.lower().split())
+        
+    token_freq = {}
+    s2_s3_tokens = []
+    
+    for _, row in s2_s3.iterrows():
+        name = row.get("normalized_name", row.get("clean_name", row.get("name", "")))
+        tokens = get_tokens(name)
+        s2_s3_tokens.append((row["entity_id"], tokens))
+        for token in tokens:
+            token_freq[token] = token_freq.get(token, 0) + 1
+            
+    candidates = {}
+    if not token_freq:
+        for _, row in s1_df.iterrows():
+            candidates[row["entity_id"]] = set()
+        return candidates
+
+    threshold = pd.Series(list(token_freq.values())).quantile(0.25)
+    rare_tokens = {token for token, freq in token_freq.items() if freq <= threshold}
+    
+    lookup = {}
+    for entity_id, tokens in s2_s3_tokens:
+        for token in tokens:
+            if token in rare_tokens:
+                lookup.setdefault(token, set()).add(entity_id)
+                
+    for _, row in s1_df.iterrows():
+        s1_id = row["entity_id"]
+        name = row.get("normalized_name", row.get("clean_name", row.get("name", "")))
+        tokens = get_tokens(name)
+        
+        cands = set()
+        for token in tokens:
+            if token in rare_tokens and token in lookup:
+                cands.update(lookup[token])
+                
+        candidates[s1_id] = cands
+
+    return candidates
 
 # -------------------------------------------------------------------------
 # High-Level Pipeline: Build Blocking v1
